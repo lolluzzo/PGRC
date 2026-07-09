@@ -8,6 +8,26 @@ registrato può cercare ricette (dati forniti dalle API di
 proprio **ricettario personale**, aggiungere **note private** e pubblicare
 **recensioni** visibili a tutti gli utenti.
 
+## Specifica e documentazione
+
+- [PWM_Online_project_25_26.pdf](PWM_Online_project_25_26.pdf) — traccia
+  ufficiale del progetto ([pdf-text.md](pdf-text.md) ne è la trascrizione
+  testuale)
+- [REQUIREMENTS.md](REQUIREMENTS.md) — requisiti estratti dalla traccia
+  (Light / Full)
+- [ANALYSIS.md](ANALYSIS.md) — analisi e to-do del progetto Full
+- [DOCS.md](DOCS.md) — documentazione di tutti i metodi, file per file
+
+Come indicato nella premessa della traccia, la specifica è per sua natura
+**incompleta e ambigua**: le soluzioni alternative vanno valutate e le scelte
+implementative giustificate e **documentate nel progetto** (qui e nella
+relazione finale). Il lavoro segue le **cinque fasi** previste: i) analisi dei
+requisiti; ii) identificazione delle funzionalità da sviluppare;
+iii) progettazione della struttura e della presentazione delle pagine web;
+iv) progettazione della sorgente di informazioni (statica o dinamica);
+v) implementazione dell'applicazione. Il progetto è una prova d'esame
+**individuale**.
+
 ## Stack tecnico
 
 - **HTML5** — applicazione multi-pagina (una pagina per vista)
@@ -49,6 +69,12 @@ PGRC/
 ├── login.html          # Accesso
 ├── register.html       # Registrazione (crea anche il ricettario vuoto)
 ├── reset.html          # Recupero password (domanda di sicurezza)
+├── README.md           # Questo file
+├── REQUIREMENTS.md     # Requisiti estratti dalla traccia (Light / Full)
+├── ANALYSIS.md         # Analisi e to-do del progetto Full
+├── DOCS.md             # Documentazione di tutti i metodi
+├── PWM_Online_project_25_26.pdf   # Traccia ufficiale
+├── pdf-text.md         # Trascrizione testuale della traccia
 ├── css/
 │   └── style.css       # Tema del progetto + livello di compatibilità Bootstrap
 └── js/

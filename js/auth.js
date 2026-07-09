@@ -75,7 +75,6 @@ const Auth = {
             username,
             email,
             salt,
-            cleanPassword: password,
             passwordHash: await this.hash(salt + password),
             favoriteDishes: this.parseDishes(favoriteDishes),
             security: {
