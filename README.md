@@ -15,7 +15,6 @@ proprio **ricettario personale**, aggiungere **note private** e pubblicare
   testuale)
 - [REQUIREMENTS.md](REQUIREMENTS.md) — requisiti estratti dalla traccia
   (Light / Full)
-- [ANALYSIS.md](ANALYSIS.md) — analisi e to-do del progetto Full
 - [DOCS.md](DOCS.md) — documentazione di tutti i metodi, file per file
 
 Come indicato nella premessa della traccia, la specifica è per sua natura
@@ -43,6 +42,7 @@ v) implementazione dell'applicazione. Il progetto è una prova d'esame
 Non serve alcuna build: è sufficiente servire la cartella con un web server
 statico e aprire `index.html` (serve la connessione a Internet al primo
 avvio per scaricare le ricette e Bootstrap dal CDN).
+Se la connessione non è disponibile al primo avvio, viene mostrata una pagina di errore che invita a riprovare
 
 ```bash
 # una qualunque delle due
@@ -54,7 +54,9 @@ Poi visitare <http://localhost:8080/>.
 
 > Al primo avvio l'app scarica l'intero dataset di TheMealDB (una richiesta
 > per lettera a–z) e lo salva nel Web Storage: le visite successive e tutte
-> le ricerche lavorano sui dati locali.
+> le ricerche lavorano sui dati locali. Questa scelta evita chiamate ripetute
+> all'API e permette di eseguire tutte le ricerche (anche combinate) direttamente
+> sui dati locali.
 
 ## Struttura del progetto
 
@@ -71,7 +73,6 @@ PGRC/
 ├── reset.html          # Recupero password (domanda di sicurezza)
 ├── README.md           # Questo file
 ├── REQUIREMENTS.md     # Requisiti estratti dalla traccia (Light / Full)
-├── ANALYSIS.md         # Analisi e to-do del progetto Full
 ├── DOCS.md             # Documentazione di tutti i metodi
 ├── PWM_Online_project_25_26.pdf   # Traccia ufficiale
 ├── pdf-text.md         # Trascrizione testuale della traccia
@@ -83,8 +84,14 @@ PGRC/
     ├── auth.js         # Registrazione, login, profilo, recupero password
     ├── ui.js           # Utility, componenti condivisi, rendering, azioni globali
     └── pages/          # Uno script per pagina: definisce l'oggetto `Page`
-        ├── home.js     ├── search.js   ├── recipe.js   ├── cookbook.js
-        ├── profile.js  ├── login.js    ├── register.js └── reset.js
+        ├── home.js
+        ├── search.js
+        ├── recipe.js
+        ├── cookbook.js
+        ├── profile.js
+        ├── login.js
+        ├── register.js
+        └── reset.js
 ```
 
 Ogni pagina HTML condivide la stessa struttura (header, footer, toast) e
