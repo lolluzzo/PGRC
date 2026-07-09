@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scheda ricetta — PGRC</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍳</text></svg>">
+    <!-- Bootstrap 5: layout e componenti di base (il tema è in css/style.css) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="recipe">
+    <header class="site-header">
+        <div class="header-inner d-flex align-items-center justify-content-between flex-wrap">
+            <a href="index.html" class="brand">🍳 <span>PGRC</span></a>
+            <nav id="main-nav" class="main-nav d-flex align-items-center flex-wrap">
+                <a href="index.html" data-nav="home">Home</a>
+                <a href="search.html" data-nav="search">Cerca ricette</a>
+                <a href="cookbook.html" data-nav="cookbook" data-auth="user" hidden>Il mio ricettario</a>
+                <a href="profile.html" data-nav="profile" data-auth="user" hidden>Profilo</a>
+                <a href="login.html" data-nav="login" data-auth="guest">Accedi</a>
+                <a href="register.html" data-nav="register" data-auth="guest" class="nav-cta">Registrati</a>
+                <span id="nav-user" class="nav-user" data-auth="user" hidden></span>
+                <button id="logout-btn" type="button" class="nav-cta nav-logout" data-auth="user" hidden>Esci</button>
+            </nav>
+        </div>
+    </header>
+
+    <main id="view" class="view container-xl">
+        <section class="loading-screen">
+            <div class="spinner" aria-hidden="true"></div>
+            <p id="loading-msg">Caricamento delle ricette da TheMealDB…</p>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <p>PGRC — Progetto PWM A.A. 2025/2026 · Dati ricette da
+            <a href="https://www.themealdb.com/" target="_blank" rel="noopener">TheMealDB</a> ·
+            Tutti i dati utente sono salvati nel Web Storage del browser.</p>
+    </footer>
+
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/pages/recipe.js"></script>
+</body>
+</html>
