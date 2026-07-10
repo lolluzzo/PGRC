@@ -119,6 +119,20 @@ const API = {
         );
     },
 
+    /** Ricerca combinata su tutti i campi (titolo, ingredienti, testo descrittivo). */
+    searchAll(query) {
+        const q = query.trim().toLowerCase();
+        if (!q) return DB.getRecipeList();
+        return DB.getRecipeList().filter(r =>
+            r.name.toLowerCase().includes(q) ||
+            r.ingredients.some(ing => ing.name.toLowerCase().includes(q)) ||
+            r.instructions.toLowerCase().includes(q) ||
+            r.category.toLowerCase().includes(q) ||
+            r.area.toLowerCase().includes(q) ||
+            r.tags.some(t => t.toLowerCase().includes(q))
+        );
+    },
+
     searchByLetter(letter) {
         const l = letter.trim().toLowerCase();
         if (!l) return DB.getRecipeList();

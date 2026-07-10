@@ -39,7 +39,7 @@ const Page = {
                                 data-recipe="${esc(id)}">
                             ${entry ? '✓ Nel ricettario — rimuovi' : '+ Aggiungi al ricettario'}
                         </button>`
-                        : `<p class="muted"><a href="login.html">Accedi</a> per salvare la ricetta nel tuo ricettario.</p>`}
+                : `<p class="muted"><a href="login.html">Accedi</a> per salvare la ricetta nel tuo ricettario.</p>`}
                     ${recipe.youtube ? `<p><a class="link" href="${esc(recipe.youtube)}" target="_blank" rel="noopener">▶ Video ricetta su YouTube</a></p>` : ''}
                 </div>
             </div>
@@ -49,7 +49,7 @@ const Page = {
                     <h2>Ingredienti</h2>
                     <ul class="ingredient-list">
                         ${recipe.ingredients.map(ing =>
-                            `<li><span>${esc(ing.name)}</span><span class="muted">${esc(ing.measure)}</span></li>`).join('')}
+                    `<li><span>${esc(ing.name)}</span><span class="muted">${esc(ing.measure)}</span></li>`).join('')}
                     </ul>
                 </section>
                 <section class="panel">
@@ -133,9 +133,18 @@ function renderNotesSection(user, entry, recipeId) {
 }
 
 function renderReviewsSection(user, reviews, recipeId) {
+
+    let mediaReviewDifficulty = 0, mediaReviewTaste = 0;
+    reviews?.forEach(el => {
+        mediaReviewDifficulty = mediaReviewDifficulty + el.difficulty;
+        mediaReviewTaste = mediaReviewTaste + el.taste;
+    })
+    mediaReviewDifficulty = Math.round(mediaReviewDifficulty / reviews?.length);
+    mediaReviewTaste = Math.round(mediaReviewTaste / reviews?.length);
+
     return `
     <section class="panel">
-        <h2>Recensioni <span class="muted small">(${reviews.length})</span></h2>
+        <h2>Recensioni <span class="muted small">(${reviews.length}) Difficoltà <span class="stars">${stars(mediaReviewDifficulty)}</span> | Gusto <span class="stars">${stars(mediaReviewTaste)}</span></span></h2>
         ${reviews.length === 0 ? '<p class="muted">Ancora nessuna recensione: sii il primo a lasciarne una!</p>' : `
         <ul class="review-list">
             ${reviews.map(review => `
@@ -144,7 +153,7 @@ function renderReviewsSection(user, reviews, recipeId) {
                         <strong>${esc(review.username)}</strong>
                         <span class="muted small">ha preparato il piatto il ${fmtDate(review.prepDate)}</span>
                         ${user && user.id === review.userId
-                            ? `<button type="button" class="btn btn-small btn-danger" data-action="remove-review"
+            ? `<button type="button" class="btn btn-small btn-danger" data-action="remove-review"
                                        data-review="${esc(review.id)}">Rimuovi</button>` : ''}
                     </div>
                     <p class="review-ratings">
@@ -175,6 +184,6 @@ function renderReviewsSection(user, reviews, recipeId) {
             <textarea name="comment" class="form-control" rows="2" placeholder="Commento (facoltativo)…"></textarea>
             <button type="submit" class="btn btn-primary">Pubblica recensione</button>
         </form>`
-        : `<p class="muted"><a href="login.html">Accedi</a> per lasciare una recensione.</p>`}
+            : `<p class="muted"><a href="login.html">Accedi</a> per lasciare una recensione.</p>`}
     </section>`;
 }
