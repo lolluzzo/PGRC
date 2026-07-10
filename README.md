@@ -16,6 +16,8 @@ proprio **ricettario personale**, aggiungere **note private** e pubblicare
 - [REQUIREMENTS.md](REQUIREMENTS.md) — requisiti estratti dalla traccia
   (Light / Full)
 - [DOCS.md](DOCS.md) — documentazione di tutti i metodi, file per file
+- [RELAZIONE.md](RELAZIONE.md) — relazione di progetto (da esportare in PDF
+  per la consegna)
 
 Come indicato nella premessa della traccia, la specifica è per sua natura
 **incompleta e ambigua**: le soluzioni alternative vanno valutate e le scelte

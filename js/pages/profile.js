@@ -50,7 +50,7 @@ const Page = {
                 <button type="submit" class="btn btn-primary">Salva modifiche</button>
             </form>
 
-            <h2>Zona pericolosa</h2>
+            <h2>Cancellazione</h2>
             <div class="panel danger-zone">
                 <p class="muted">La cancellazione del profilo rimuove definitivamente account,
                    ricettario, note private e recensioni pubblicate.</p>
