@@ -1,5 +1,7 @@
 # PGRC — Piattaforma per la Gestione di Ricette di Cucina
 
+#### Repo GitHub -> https://github.com/lolluzzo/PGRC
+
 Progetto per il corso **Programmazione Web e Mobile** (A.A. 2025/2026).
 
 PGRC è un portale web per la gestione di ricette culinarie: un utente
