@@ -3,13 +3,17 @@
  *
  * Modello dati:
  *  pgrc_users    : [{ id, username, email, passwordHash, salt, favoriteDishes[],
+ *                     isRestaurateur,
  *                     security: { question, answerHash },
  *                     cookbook: [{ recipeId, addedAt, custom: {name?, instructions?} | null,
  *                                  notes: [{ id, text, createdAt }] }],
  *                     createdAt }]
  *  pgrc_session  : { userId, loginAt } | null
- *  pgrc_recipes  : { "<idMeal>": { id, name, category, area, instructions, thumb,
- *                                  tags[], youtube, ingredients: [{name, measure}] } }
+ *  pgrc_recipes  : { "<id>": { id, name, category, area, instructions, thumb,
+ *                              tags[], youtube, ingredients: [{name, measure}],
+ *                              custom?, ownerId? } }
+ *                  (le ricette create dagli utenti hanno id "custom-…",
+ *                   custom: true e ownerId dell'autore)
  *  pgrc_reviews  : [{ id, recipeId, userId, username, prepDate,
  *                     difficulty (1-5), taste (1-5), comment, createdAt }]
  *  pgrc_seeded_at: timestamp dell'ultimo download completo da TheMealDB
@@ -71,8 +75,12 @@ const DB = {
         this.saveUsers(users);
     },
     deleteUser(id) {
+        // Elimina prima le ricette create dall'utente (spariscono da archivio,
+        // ricettari di tutti e recensioni), poi l'utente e le sue recensioni.
+        this.getRecipeList()
+            .filter(r => r.custom && r.ownerId === id)
+            .forEach(r => this.deleteRecipe(r.id));
         this.saveUsers(this.getUsers().filter(u => u.id !== id));
-        // Rimuove anche le recensioni lasciate dall'utente.
         this.saveReviews(this.getReviews().filter(r => r.userId !== id));
     },
 
@@ -111,6 +119,15 @@ const DB = {
         const map = this.getRecipeMap();
         recipes.forEach(r => { map[r.id] = r; });
         this.saveRecipeMap(map);
+    },
+    /** Elimina una ricetta (creata da un utente) da archivio, ricettari e recensioni. */
+    deleteRecipe(id) {
+        const map = this.getRecipeMap();
+        delete map[id];
+        this.saveRecipeMap(map);
+        this.saveUsers(this.getUsers().map(u =>
+            ({ ...u, cookbook: u.cookbook.filter(e => e.recipeId !== id) })));
+        this.saveReviews(this.getReviews().filter(r => r.recipeId !== id));
     },
     getSeededAt() {
         return Storage.read(this.KEYS.SEEDED_AT, null);

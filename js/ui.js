@@ -93,7 +93,8 @@ function recipeCard(recipe) {
         <img class="card-img" src="${esc(recipe.thumb)}" alt="${esc(recipe.name)}" loading="lazy">
         <div class="card-body">
             <h3 class="card-title">${esc(recipe.name)}</h3>
-            <p class="card-meta">${esc(recipe.category)}${recipe.area ? ' · ' + esc(recipe.area) : ''}</p>
+            <p class="card-meta">${esc(recipe.category)}${recipe.area ? ' · ' + esc(recipe.area) : ''}
+                ${recipe.custom ? '<span class="tag tag-chef">ricetta utente</span>' : ''}</p>
         </div>
     </a>`;
 }
@@ -216,10 +217,22 @@ document.addEventListener('click', event => {
         case 'remove-from-cookbook': {
             if (!user) return;
             const recipeId = target.dataset.recipe;
-            if (!confirm('Rimuovere la ricetta dal ricettario? Le note private associate andranno perse.')) return;
-            user.cookbook = user.cookbook.filter(e => e.recipeId !== recipeId);
-            DB.updateUser(user);
-            toast('Ricetta rimossa dal ricettario.', 'info');
+            const recipe = DB.getRecipe(recipeId);
+            // Per una ricetta creata dall'utente la rimozione è l'eliminazione
+            // definitiva dall'archivio (requisito "cancellazione delle sue ricette").
+            const ownsCustom = recipe && recipe.custom && recipe.ownerId === user.id;
+            const message = ownsCustom
+                ? 'Questa ricetta è stata creata da te: verrà eliminata definitivamente dalla piattaforma, anche dai ricettari degli altri utenti. Continuare?'
+                : 'Rimuovere la ricetta dal ricettario? Le note private associate andranno perse.';
+            if (!confirm(message)) return;
+            if (ownsCustom) {
+                DB.deleteRecipe(recipeId);
+                toast('Ricetta eliminata definitivamente.', 'info');
+            } else {
+                user.cookbook = user.cookbook.filter(e => e.recipeId !== recipeId);
+                DB.updateUser(user);
+                toast('Ricetta rimossa dal ricettario.', 'info');
+            }
             render();
             break;
         }

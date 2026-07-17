@@ -15,6 +15,7 @@ const Page = {
         }
         const user = DB.currentUser();
         const entry = user ? user.cookbook.find(e => e.recipeId === id) : null;
+        const author = recipe.custom ? DB.getUserById(recipe.ownerId) : null;
         const reviews = DB.getReviewsForRecipe(id);
         const avg = key => reviews.length
             ? (reviews.reduce((s, r) => s + Number(r[key]), 0) / reviews.length).toFixed(1)
@@ -27,6 +28,8 @@ const Page = {
                 <div class="recipe-head-info">
                     <h1>${esc(recipe.name)}</h1>
                     <p class="card-meta">${esc(recipe.category)}${recipe.area ? ' · Cucina ' + esc(recipe.area) : ''}</p>
+                    ${recipe.custom ? `<p class="card-meta">👨‍🍳 Ricetta creata ${author && author.isRestaurateur ? 'dal ristoratore' : 'dall’utente'}
+                        <strong>${author ? esc(author.username) : 'sconosciuto'}</strong></p>` : ''}
                     ${recipe.tags.length ? `<p class="tags">${recipe.tags.map(t => `<span class="tag">${esc(t)}</span>`).join('')}</p>` : ''}
                     ${reviews.length ? `
                         <p class="avg-ratings">
@@ -182,7 +185,7 @@ function renderReviewsSection(user, reviews, recipeId) {
                 </label>
             </div>
             <textarea name="comment" class="form-control" rows="2" placeholder="Commento (facoltativo)…"></textarea>
-            <button type="submit" class="btn btn-primary">Pubblica recensione</button>
+            <button type="submit" class="btn btn-primary pt-2">Pubblica recensione</button>
         </form>`
             : `<p class="muted"><a href="login.html">Accedi</a> per lasciare una recensione.</p>`}
     </section>`;

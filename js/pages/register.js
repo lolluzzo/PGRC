@@ -26,6 +26,10 @@ const Page = {
                 <label class="form-label">Piatti preferiti <span class="muted small">(separati da virgola, facoltativo)</span>
                     <input type="text" name="favoriteDishes" class="form-control" placeholder="es. Carbonara, Sushi, Paella">
                 </label>
+                <label class="check-label">
+                    <input type="checkbox" name="isRestaurateur">
+                    Sono un ristoratore <span class="muted small">(il profilo mostrerà il badge dedicato)</span>
+                </label>
                 <fieldset>
                     <legend>Recupero password</legend>
                     <label class="form-label">Domanda di sicurezza
@@ -53,6 +57,7 @@ const Page = {
                     password: data.get('password'),
                     passwordConfirm: data.get('passwordConfirm'),
                     favoriteDishes: data.get('favoriteDishes'),
+                    isRestaurateur: data.get('isRestaurateur') === 'on',
                     securityQuestion: data.get('securityQuestion'),
                     securityAnswer: data.get('securityAnswer')
                 });

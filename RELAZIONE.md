@@ -58,7 +58,8 @@ Dalla traccia sono stati individuati quattro macro-scenari:
    delle ricette (elenco, ingredienti e ogni altra informazione) devono essere
    acquisiti tramite le **API REST di TheMealDB**.
 3. **Gestione del ricettario personale** — aggiunta e rimozione delle ricette
-   dal ricettario tramite un pulsante nella scheda della ricetta; possibilità
+   dal ricettario tramite un pulsante nella scheda della ricetta; creazione di
+   **ricette proprie** tramite un form dedicato nel ricettario; possibilità
    di associare a ciascuna ricetta una nota testuale **privata** (non visibile
    agli altri utenti).
 4. **Recensioni** — ogni utente può recensire una ricetta specificando data di
@@ -72,9 +73,14 @@ nel Web Storage** del browser e visualizzati nell'applicazione; devono esistere
 operazioni di presentazione e modifica delle informazioni nel Web Storage.
 
 Un punto ambiguo della specifica Light («gestione dei dati dell'utente … sia
-utente finale sia ristoratore») è stato interpretato come refuso proveniente da
-un'altra traccia: in PGRC non esiste alcuna funzione riservata a un
-"ristoratore", quindi è stato modellato **un solo tipo di utente registrato**.
+utente finale sia ristoratore»): nessuno dei quattro macro-scenari attribuisce
+al ristoratore funzioni specifiche, quindi introdurre un tipo di utente
+separato avrebbe richiesto di inventare scenari non richiesti. Il ristoratore
+è stato perciò modellato come **attributo del profilo** (flag `isRestaurateur`
+dichiarato con una casella in fase di registrazione e mostrato nel profilo con
+un badge dedicato): registrazione, modifica e cancellazione dei dati sono
+identiche per utente finale e ristoratore, soddisfacendo alla lettera il
+requisito.
 
 ---
 
@@ -186,14 +192,16 @@ gestione degli errori di parsing). Le chiavi e i relativi schemi:
 
 ```
 pgrc_users    : [{ id, username, email, passwordHash, salt, favoriteDishes[],
+                   isRestaurateur,
                    security: { question, answerHash },
                    cookbook: [{ recipeId, addedAt,
                                 custom: { name?, instructions? } | null,
                                 notes: [{ id, text, createdAt }] }],
                    createdAt }]
 pgrc_session  : { userId, loginAt } | null
-pgrc_recipes  : { "<idMeal>": { id, name, category, area, instructions, thumb,
-                                tags[], youtube, ingredients: [{name, measure}] } }
+pgrc_recipes  : { "<id>": { id, name, category, area, instructions, thumb,
+                            tags[], youtube, ingredients: [{name, measure}],
+                            custom?, ownerId? } }
 pgrc_reviews  : [{ id, recipeId, userId, username, prepDate,
                    difficulty (1-5), taste (1-5), comment, createdAt }]
 pgrc_seeded_at: timestamp dell'ultimo download completo
@@ -205,6 +213,12 @@ Scelte di modellazione principali:
   (scheda ricetta, voci del ricettario) è diretto, e l'inserimento dal seeding
   (`upsertRecipes`) è idempotente. L'elenco ordinato per nome è derivato al
   volo da `getRecipeList()`.
+- **Ricette create dagli utenti nella stessa mappa** delle ricette TheMealDB,
+  con id `custom-…` (nessuna collisione con gli id numerici dell'API), flag
+  `custom: true` e `ownerId` dell'autore: schede, ricerche e ricettari
+  funzionano senza casi speciali. L'eliminazione (`DB.deleteRecipe`, riservata
+  all'autore) le rimuove da archivio, ricettari di tutti gli utenti e
+  recensioni.
 - **Ricettario e note dentro l'oggetto utente**: ricettario e note sono dati
   privati del singolo utente, quindi vivono nel suo `cookbook`; questo rende
   naturale il requisito di privacy delle note (un altro utente non le vede
@@ -257,10 +271,10 @@ Ogni pagina carica gli script comuni (`storage.js`, `api.js`, `auth.js`,
 | `index.html` (Home) | *Hero* con messaggio personalizzato per l'utente loggato, form di ricerca rapida, barra delle lettere a–z e anteprima delle prime ricette |
 | `search.html` | Form di ricerca (tipo + termine), barra a–z, risultati in griglia con conteggio e paginazione "Mostra altri" |
 | `recipe.html?id=…` | Scheda completa della ricetta: immagine, categoria/area, tag, medie dei voti, pulsante aggiungi/rimuovi dal ricettario, ingredienti con dosi, procedimento, sezione note private e sezione recensioni |
-| `cookbook.html` | Ricettario personale (richiede login): elenco delle ricette salvate con eventuale personalizzazione e note |
-| `profile.html` | Profilo (richiede login): riepilogo dati, form di modifica con cambio password opzionale, cancellazione account |
+| `cookbook.html` | Ricettario personale (richiede login): elenco delle ricette salvate con eventuale personalizzazione e note, più il form per creare ricette proprie |
+| `profile.html` | Profilo (richiede login): riepilogo dati (con badge "Ristoratore" se dichiarato), form di modifica con cambio password opzionale, cancellazione account |
 | `login.html` | Accesso con username **o** email + password |
-| `register.html` | Registrazione completa (credenziali, piatti preferiti, domanda e risposta di sicurezza) |
+| `register.html` | Registrazione completa (credenziali, piatti preferiti, casella "Sono un ristoratore", domanda e risposta di sicurezza) |
 | `reset.html` | Recupero password in due passi tramite domanda di sicurezza |
 
 Essendo l'applicazione multi-pagina, un messaggio di conferma mostrato subito
@@ -300,7 +314,9 @@ su toast, barra delle lettere e form di ricerca, `alt` sulle immagini.
 
 **Registrazione** (`register.html`, `Auth.register`). Il form raccoglie
 username, email, password (con conferma), piatti preferiti (stringa separata da
-virgole, convertita in array) e una domanda di sicurezza con risposta, usata
+virgole, convertita in array), la casella **"Sono un ristoratore"** (flag
+`isRestaurateur`, mostrato nel profilo come badge e accanto all'autore nelle
+sue ricette) e una domanda di sicurezza con risposta, usata
 per il recupero password. La validazione controlla lunghezze minime (username
 ≥ 3, password ≥ 6), formato dell'email, coincidenza delle password e
 **unicità** di username ed email (confronto case-insensitive). Alla
@@ -331,7 +347,8 @@ username cambia, viene aggiornato anche nelle recensioni già pubblicate, per
 mantenerle coerenti.
 
 **Cancellazione dell'account** (`Auth.deleteAccount`). Previa conferma
-(`confirm`), l'utente viene rimosso insieme a tutte le sue recensioni; la
+(`confirm`), l'utente viene rimosso insieme a tutte le sue recensioni e alle
+ricette da lui create (eliminate anche dai ricettari degli altri utenti); la
 sessione viene chiusa e si torna alla home. Ricettario e note, essendo
 contenuti nell'oggetto utente, vengono eliminati con esso.
 
@@ -394,6 +411,21 @@ e offre:
   utenti, come richiesto; per aggiungere una nota la ricetta deve prima essere
   nel ricettario (la nota è un'annotazione della *propria* copia).
 
+Oltre alle ricette di TheMealDB, dal ricettario è possibile **creare una
+ricetta propria** tramite un form dedicato: nome, categoria e cucina
+(facoltative), ingredienti con dosi (uno per riga, dose dopo i due punti),
+procedimento e URL dell'immagine (con segnaposto se assente). La ricetta viene
+salvata nell'archivio condiviso `pgrc_recipes` con id `custom-…`, `custom:
+true` e `ownerId` dell'autore, e aggiunta al suo ricettario: da quel momento è
+ricercabile, consultabile e recensibile come le altre (card e scheda la
+contrassegnano come "ricetta utente", indicando l'autore — e se questi è un
+ristoratore lo si evidenzia). Questo copre anche la lettera del requisito
+Light «aggiunta … delle sue ricette». Solo l'autore può eliminarla
+definitivamente: per lui il pulsante "Rimuovi" la cancella (previa conferma
+esplicita) da archivio, ricettari di tutti gli utenti e recensioni
+(`DB.deleteRecipe`); per gli altri utenti la rimozione toglie solo la voce dal
+proprio ricettario.
+
 ### 6.5 Recensioni
 
 Dalla scheda della ricetta ogni utente autenticato può pubblicare una
@@ -424,7 +456,8 @@ verifica l'autore anche a livello di `DB.deleteReview`).
 | Bootstrap 5 + tema personalizzato | Componenti e griglia consolidati, ma aspetto interamente controllato da `css/style.css` |
 | Messaggi flash in `sessionStorage` | Feedback che sopravvive alla navigazione tra pagine |
 | Paginazione "Mostra altri" (24 card) | Il dataset completo (~300 ricette) non viene mai renderizzato in blocco |
-| Un solo tipo di utente (niente "ristoratore") | Il riferimento al ristoratore nella specifica Light è stato valutato come refuso: nessuno scenario di PGRC gli attribuisce funzioni |
+| Ristoratore come attributo del profilo (flag + badge) | La specifica non gli attribuisce funzioni: un tipo di utente separato avrebbe richiesto scenari inventati; il flag soddisfa alla lettera il requisito («sia utente finale sia ristoratore») con gestione dati identica |
+| Ricette create dagli utenti nella stessa mappa di quelle TheMealDB | Nessun caso speciale in ricerche, schede e ricettari; id `custom-…` senza collisioni; eliminazione definitiva riservata all'autore |
 
 ---
 
@@ -451,15 +484,19 @@ operazione prevista.
 7. Ricettario: elenco delle ricette salvate, personalizzazione di titolo e
    procedimento con badge e ripristino dell'originale, rimozione di una
    ricetta.
-8. Note private: inserimento e rimozione; verifica con un secondo utente che
+8. Creazione di una ricetta propria dal ricettario: form compilato, ricetta
+   visibile nelle ricerche con badge "ricetta utente", scheda con indicazione
+   dell'autore, eliminazione definitiva da parte dell'autore.
+9. Note private: inserimento e rimozione; verifica con un secondo utente che
    le note non sono visibili ad altri.
-9. Recensioni: inserimento con data di preparazione e voti 1–5, visualizzazione
-   pubblica nella scheda, rimozione della propria recensione (e assenza del
-   pulsante sulle recensioni altrui).
-10. Profilo: modifica dei dati (con cambio password), recupero password con
-    domanda di sicurezza, cancellazione dell'account con rimozione delle sue
-    recensioni.
-11. Layout responsive (viewport mobile).
+10. Recensioni: inserimento con data di preparazione e voti 1–5, visualizzazione
+    pubblica nella scheda, rimozione della propria recensione (e assenza del
+    pulsante sulle recensioni altrui).
+11. Profilo: badge "Ristoratore" per gli account che l'hanno dichiarato,
+    modifica dei dati (con cambio password), recupero password con domanda di
+    sicurezza, cancellazione dell'account con rimozione delle sue recensioni e
+    delle ricette da lui create.
+12. Layout responsive (viewport mobile).
 
 ---
 
@@ -472,6 +509,7 @@ allo startup, persistenza in formato JSON nel Web Storage e operazioni di
 presentazione e modifica dei dati memorizzati. Oltre ai requisiti sono state
 aggiunte alcune funzionalità extra: recupero password con domanda di sicurezza,
 hash delle credenziali, personalizzazione delle ricette del ricettario,
+creazione di ricette proprie condivise sulla piattaforma, badge "ristoratore",
 paginazione dei risultati e toast di feedback.
 
 Possibili estensioni future: aggiornamento periodico del dataset (re-seeding

@@ -13,7 +13,8 @@ const Page = {
         <section class="narrow">
             <h1>Il mio profilo</h1>
             <div class="panel profile-summary">
-                <p><strong>Username:</strong> ${esc(user.username)}</p>
+                <p><strong>Username:</strong> ${esc(user.username)}
+                   ${user.isRestaurateur ? '<span class="tag tag-chef">👨‍🍳 Ristoratore</span>' : ''}</p>
                 <p><strong>Email:</strong> ${esc(user.email)}</p>
                 <p><strong>Piatti preferiti:</strong> ${user.favoriteDishes.length
                     ? user.favoriteDishes.map(d => `<span class="tag">${esc(d)}</span>`).join(' ')

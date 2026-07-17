@@ -43,7 +43,7 @@ const Auth = {
      * automaticamente il ricettario personale vuoto (requisito).
      * @throws {Error} con messaggio leggibile se la validazione fallisce
      */
-    async register({ username, email, password, passwordConfirm, favoriteDishes, securityQuestion, securityAnswer }) {
+    async register({ username, email, password, passwordConfirm, favoriteDishes, isRestaurateur, securityQuestion, securityAnswer }) {
         username = String(username || '').trim();
         email = String(email || '').trim();
 
@@ -78,6 +78,7 @@ const Auth = {
             // cleanPassword: password,
             passwordHash: await this.hash(salt + password),
             favoriteDishes: this.parseDishes(favoriteDishes),
+            isRestaurateur: Boolean(isRestaurateur),
             security: {
                 question: securityQuestion,
                 answerHash: await this.hash(salt + this.normalizeAnswer(securityAnswer))

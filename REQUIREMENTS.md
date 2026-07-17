@@ -102,4 +102,4 @@
 - Il progetto è **individuale** (nessun gruppo)
 - La specifica è volutamente incompleta: le scelte implementative vanno giustificate e **documentate nella relazione**
 - Funzionalità extra sono ammesse e valutate positivamente
-- La specifica del progetto Light cita la gestione dati «sia utente finale sia ristoratore»: probabile refuso da un'altra traccia (in PGRC esiste solo l'utente registrato); la scelta va motivata nella relazione
+- La specifica del progetto Light cita la gestione dati «sia utente finale sia ristoratore»: nessuno scenario di PGRC attribuisce funzioni al ristoratore, quindi è modellato come **attributo del profilo** (checkbox in registrazione + badge nel profilo), con gestione dati identica per i due tipi; la scelta è motivata nella relazione
